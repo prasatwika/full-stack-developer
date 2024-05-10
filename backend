@@ -1,0 +1,70 @@
+Step 1: Initialize a Node.js Project
+mkdir task-manager-api
+cd task-manager-api
+npm init -y
+Step 2: Install Dependencies
+npm install express mongoose body-parser cors
+Step 3: Set Up Express and Mongoose
+const express = require('express');
+const mongoose = require('mongoose');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+
+const app = express();
+
+// Middleware
+app.use(cors());
+app.use(bodyParser.json());
+
+// MongoDB connection
+mongoose.connect('mongodb://localhost:27017/taskManager', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
+.then(() => console.log('MongoDB connected'))
+.catch(err => console.error(err));
+
+// Define the Task model
+const TaskSchema = new mongoose.Schema({
+  title: String,
+  description: String,
+  dueDate: Date
+});
+
+const Task = mongoose.model('Task', TaskSchema);
+
+// API routes
+app.get('/tasks', async (req, res) => {
+  const tasks = await Task.find();
+  res.json(tasks);
+});
+
+app.post('/tasks', async (req, res) => {
+  const newTask = new Task(req.body);
+  const savedTask = await newTask.save();
+  res.json(savedTask);
+});
+
+app.get('/tasks/:id', async (req, res) => {
+  const task = await Task.findById(req.params.id);
+  res.json(task);
+});
+
+app.put('/tasks/:id', async (req, res) => {
+  const updatedTask = await Task.findByIdAndUpdate(req.params.id, req.body, { new: true });
+  res.json(updatedTask);
+});
+
+app.delete('/tasks/:id', async (req, res) => {
+  const deletedTask = await Task.findByIdAndDelete(req.params.id);
+  res.json(deletedTask);
+});
+
+// Server setup
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(Server running on port ${PORT}));
+
+Step 4: Run the Server
+node app.js
+
+Step 5: Test Your API
