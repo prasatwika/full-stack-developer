@@ -1,0 +1,209 @@
+(index.html)
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Management Application</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>Tasks</h2>
+        <div id="tasksList"></div>
+        <button class="btn btn-primary my-3" onclick="showAddTaskModal()">Add Task</button>
+    </div>
+
+    <!-- Task Modal -->
+    <div class="modal" tabindex="-1" role="dialog" id="taskModal">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalTitle">Add New Task</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form id="taskForm">
+              <div class="form-group">
+                <label for="taskTitle">Title</label>
+                <input type="text" class="form-control" id="taskTitle" required>
+              </div>
+              <div class="form-group">
+                <label for="taskDescription">Description</label>
+                <textarea class="form-control" id="taskDescription" rows="3" required></textarea>
+              </div>
+              <div class="form-group">
+                <label for="taskDueDate">Due Date</label>
+                <input type="date" class="form-control" id="taskDueDate" required>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" onclick="saveTask()">Save Task</button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="scripts.js"></script>
+</body>
+</html>
+
+2. Use appropriate HTML, CSS, and JavaScript frameworks or libraries to
+implement the front-end functionalities.
+
+Step 1: Setup Your React Project
+
+npx create-react-app task-manager-app
+cd task-manager-app
+
+Step 2: Install Dependencies
+npm install tailwindcss@latest postcss@latest autoprefixer@latest
+npm install axios
+npx tailwindcss init
+
+tailwind.config.js
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+Step 3: Create Components
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import Task from './Task';
+
+function TaskList() {
+  const [tasks, setTasks] = useState([]);
+
+  useEffect(() => {
+    fetchTasks();
+  }, []);
+
+  const fetchTasks = async () => {
+    try {
+      const response = await axios.get('http://localhost:3000/tasks');
+      setTasks(response.data);
+    } catch (error) {
+      console.error('Error fetching tasks:', error);
+    }
+  };
+
+  return (
+    <div className="p-4">
+      {tasks.map(task => (
+        <Task key={task.id} task={task} fetchTasks={fetchTasks} />
+      ))}
+    </div>
+  );
+}
+export default TaskList;
+Task.js
+import React from 'react';
+import axios from 'axios';
+
+function Task({ task, fetchTasks }) {
+  const deleteTask = async () => {
+    try {
+      await axios.delete(http://localhost:3000/tasks/${task.id});
+      fetchTasks();
+    } catch (error) {
+      console.error('Error deleting task:', error);
+    }
+  };
+
+  return (
+    <div className="bg-white p-4 rounded shadow mb-4">
+      <h5>{task.title}</h5>
+      <p>{task.description}</p>
+      <small>Due by: {task.dueDate}</small>
+      <button onClick={deleteTask} className="bg-red-500 text-white p-2 rounded mt-2">
+        Delete
+      </button>
+    </div>
+  );
+}
+
+export default Task;
+TaskForm.js
+import React, { useState } from 'react';
+import axios from 'axios';
+
+function TaskForm({ fetchTasks }) {
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [dueDate, setDueDate] = useState('');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post('http://localhost:3000/tasks', { title, description, dueDate });
+      setTitle('');
+      setDescription('');
+      setDueDate('');
+      fetchTasks();
+    } catch (error) {
+      console.error('Error adding/updating task:', error);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="p-4">
+      <input
+        type="text"
+        value={title}
+        onChange={e => setTitle(e.target.value)}
+        placeholder="Title"
+        className="p-2 border rounded mr-2"
+        required
+      />
+      <input
+        type="text"
+        value={description}
+        onChange={e => setDescription(e.target.value)}
+        placeholder="Description"
+        className="p-2 border rounded mr-2"
+        required
+      />
+      <input
+        type="date"
+        value={dueDate}
+        onChange={e => setDueDate(e.target.value)}
+        className="p-2 border rounded mr-2"
+        required
+      />
+      <button type="submit" className="bg-blue-500 text-white p-2 rounded">
+        Save Task
+      </button>
+    </form>
+  );
+}
+
+export default TaskForm;
+
+App.js
+import React from 'react';
+import TaskList from './TaskList';
+import TaskForm from './TaskForm';
+
+function App() {
+  return (
+    <div className="App">
+      <TaskForm />
+      <TaskList />
+    </div>
+  );
+}
+
+export default App;
+
+Step 5: Run the Application
+npm start
+
